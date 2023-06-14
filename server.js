@@ -111,25 +111,25 @@ app.post("items/add", upload.single('featureImage'), (req, res) => {
     req.body.featureImage = imageUrl;
     // TODO: Process the req.body and add it as a new Item before redirecting to /items
 
-  //   const itemData = {
-  //     // extract other properties from req.body
-  //     title: req.body.title,
-  //     price: req.body.price,
-  //     body: req.body.body,
-  //     category: req.body.category,
-  //     published: req.body.published,
-  //   };
+    // const itemData = {
+    //   // extract other properties from req.body
+    //   title: req.body.title,
+    //   price: req.body.price,
+    //   body: req.body.body,
+    //   category: req.body.category,
+    //   published: req.body.published,
+    // };
 
-  //   storeService
-  //     .addItem(itemData)
-  //     .then((newItem) => {
-  //       // Redirect the user to the /items route
-  //       res.redirect("/items");
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
+    // storeService
+    //   .addItem(itemData)
+    //   .then((newItem) => {
+    //     // Redirect the user to the /items route
+    //     res.redirect("/items");
+    //   })
+    //   .catch((error) => {
+    //     console.error(error);
 
-  //     });
+    //   });
    }
 });
 
