@@ -1,4 +1,15 @@
+/*********************************************************************************
 
+WEB322 – Assignment 03
+I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically from any other source (including 3rd party web sites) or distributed to other students.
+
+Name: Yusuff Oyediran 
+Student ID: 142813203 
+Date: 06/14/2023
+Cyclic Web App URL: https://drab-pear-peacock-boot.cyclic.app/about
+GitHub Repository URL: https://github.com/hack1011/web322-app
+
+********************************************************************************/
 
 
 const path = require('path');
