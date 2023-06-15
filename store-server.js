@@ -1,3 +1,4 @@
+const { rejects } = require('assert');
 const fs = require('fs');
 const path = require('path');
 
@@ -76,9 +77,62 @@ const getCategories = () => {
   });
 };
 
+function addItem(itemData) {
+  return new Promise((resolve, reject) => {
+    if (itemData.published === undefined) {
+      itemData.published = false;
+    } else {
+      itemData.published = true;
+    }
+    itemData.id = items.length + 1;
+
+    items.push(itemData);
+    
+    resolve(itemData);
+  });
+}
+
+function getItemsByCategory(category) {
+  return new Promise((resolve, reject) => {
+    const filteredItems = items.filter((item) => item.category === category);
+    if (filteredItems.length === 0) {
+      reject('No results returned');
+    } else {
+      resolve(filteredItems);
+    }
+  });
+}
+
+function getItemsByMinDate(minDateStr) {
+  return new Promise((resolve, reject) => {
+    const minDate = new Date(minDateStr);
+    const filteredItems = items.filter((item) => new Date(item.postDate) >= minDate);
+    if (filteredItems.length === 0) {
+      reject('No results returned');
+    } else {
+      resolve(filteredItems);
+    }
+  });
+}
+
+function getItemById(id) {
+  return new Promise((resolve, reject) => {
+    const item = items.find((item) => item.id.toString() === id.toString());
+    if (!item) {
+      reject('No result returned');
+    } else {
+      resolve(item);
+    }
+  });
+}
+
 module.exports = {
   initialize,
   getAllItems,
   getPublishedItems,
   getCategories,
+  addItem,
+  getItemsByCategory,
+  getItemsByMinDate,
+  getItemById,
 };
