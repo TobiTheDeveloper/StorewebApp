@@ -6,32 +6,18 @@ I declare that this assignment is my own work in accordance with Seneca  Academi
 Name: Yusuff Oyediran 
 Student ID: 142813203 
 Date: 05/30/2023
-Cyclic Web App URL: 
+Cyclic Web App URL: https://drab-pear-peacock-boot.cyclic.app/about
 GitHub Repository URL: https://github.com/hack1011/web322-app
 
-********************************************************************************/ 
+********************************************************************************/
 
 
+const path = require('path');
 const storeService = require('./store-server');
 const data = require('./store-server');
 const express = require('express');
 const app = express();
 app.use(express.static('public'));
-
-const multer = require("multer");
-const cloudinary = require('cloudinary').v2;
-const streamifier = require('streamifier');
-
-
-cloudinary.config({
-  cloud_name: 'dsngo0ucf',
-  api_key: '815917813196375',
-  api_secret: 'XZRblsdyaqxB9zUjSE7iDW5ubt8',
-  secure: true
-});
-
-const upload = multer();
-
 
 app.get('/', (req, res) => {
   res.redirect('/about');
@@ -53,19 +39,13 @@ app.get('/shop', (req, res) => {
 });
 
 app.get('/items', (req, res) => {
-  const category = req.query.category;
-  const minDate = req.query.minDate;
-
-  if (category) {
-    const itemsByCategory = storeService.getItemsByCategory(category);
-    res.json(itemsByCategory);
-  } else if (minDate) {
-    const itemsByMinDate = storeService.getItemsByMinDate(minDate);
-    res.json(itemsByMinDate);
-  } else {
-    const allItems = storeService.getItems();
-    res.json(allItems);
-  }
+  storeService.getAllItems()
+    .then((items) => {
+      res.json(items);
+    })
+    .catch((error) => {
+      res.json({ message: error });
+    });
 });
 
 
