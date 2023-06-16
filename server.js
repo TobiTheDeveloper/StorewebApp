@@ -17,6 +17,7 @@ const data = require('./store-server');
 const express = require('express');
 const app = express();
 app.use(express.static('public'));
+const path = require('path');
 
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -80,7 +81,7 @@ app.get('/categories', (req, res) => {
 });
 
 app.get('/items/add', (req, res) => {
-  res.sendFile(__dirname + '/views/addItem.html');
+  res.sendFile(__dirname + 'views', 'addItem.html');
 });
 
 app.post('/items/add', upload.single('featureImage'), (req, res) => {
