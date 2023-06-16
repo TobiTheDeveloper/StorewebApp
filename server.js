@@ -80,7 +80,7 @@ app.get('/categories', (req, res) => {
 });
 
 app.get('/items/add', (req, res) => {
-  res.sendFile(__dirname + '/views/addItem.html');
+  res.sendFile(__dirname + 'views/addItem.html');
 });
 
 app.post('/items/add', upload.single('featureImage'), (req, res) => {
