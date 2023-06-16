@@ -96,9 +96,9 @@ app.post('/items/add', upload.single('featureImage'), (req, res) => {
         });
         streamifier.createReadStream(req.file.buffer).pipe(stream);
       });
-    };
+};
 
-    async function upload(req) {
+async function upload(req) {
       let result = await streamUpload(req);
       console.log(result);
       return result;
@@ -114,9 +114,9 @@ app.post('/items/add', upload.single('featureImage'), (req, res) => {
       });
   } else {
     processItem('');
-  }
+}
 
-  function processItem(imageUrl) {
+function processItem(imageUrl) {
     req.body.featureImage = imageUrl;
     // TODO: Process the req.body and add it as a new Item before redirecting to /items
     addItem(req.body)
