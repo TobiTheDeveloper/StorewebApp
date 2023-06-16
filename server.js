@@ -6,7 +6,7 @@ I declare that this assignment is my own work in accordance with Seneca  Academi
 Name: Yusuff Oyediran 
 Student ID: 142813203 
 Date: 05/30/2023
-Cyclic Web App URL: 
+Cyclic Web App URL: https://brainy-dove-earrings.cyclic.app
 GitHub Repository URL: https://github.com/hack1011/web322-app
 
 ********************************************************************************/ 
