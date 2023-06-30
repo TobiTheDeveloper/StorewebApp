@@ -13,16 +13,15 @@ GitHub Repository URL: https://github.com/hack1011/web322-app
 
 
 const storeService = require('./store-server');
-const data = require('./store-server');
 const express = require('express');
+const exphbs = require('express-handlebars');
+
 const app = express();
 app.use(express.static('public'));
 const path = require('path');
-
-const multer = require("multer");
+const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
-
 
 cloudinary.config({
   cloud_name: 'dsngo0ucf',
@@ -33,18 +32,48 @@ cloudinary.config({
 
 const upload = multer();
 
+const hbs = exphbs.create({
+  // Your express-handlebars configuration options here (if any)
+  helpers: {
+    navLink: function (url, options) {
+      const { activeRoute } = this.app.locals;
+      const output = `<li class="nav-item ${activeRoute === url ? 'active' : ''}">
+                        <a class="nav-link" href="${url}">${options.fn(this)}</a>
+                      </li>`;
+      return output;
+    },
+    equal: function (lvalue, rvalue, options) {
+      if (arguments.length < 3)
+        throw new Error("Handlebars Helper equal needs 2 parameters");
+      if (lvalue != rvalue) {
+        return options.inverse(this);
+      } else {
+        return options.fn(this);
+      }
+    },
+  },
+});
+
+// Set the handlebars engine for rendering views
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
+
+
+
+app.use(express.static('public'));
 
 app.get('/', (req, res) => {
   res.redirect('/about');
 });
 
 app.get('/about', (req, res) => {
-  res.sendFile(__dirname + '/views/about.html');
+  res.render('about');
 });
 
 
 app.get('/shop', (req, res) => {
-  storeService.getPublishedItems()
+  storeService
+    .getPublishedItems()
     .then((items) => {
       res.json(items);
     })
@@ -69,9 +98,9 @@ app.get('/items', (req, res) => {
   }
 });
 
-
 app.get('/categories', (req, res) => {
-  storeService.getCategories()
+  storeService
+    .getCategories()
     .then((categories) => {
       res.json(categories);
     })
@@ -81,8 +110,9 @@ app.get('/categories', (req, res) => {
 });
 
 app.get('/items/add', (req, res) => {
-  res.sendFile(__dirname + 'views', 'addItem.html');
+  res.render('addItem');
 });
+
 
 app.post('/items/add', upload.single('featureImage'), (req, res) => {
   if (req.file) {
@@ -97,13 +127,15 @@ app.post('/items/add', upload.single('featureImage'), (req, res) => {
         });
         streamifier.createReadStream(req.file.buffer).pipe(stream);
       });
-};
+    };
 
-async function upload(req) {
-      let result = await streamUpload(req);
-      console.log(result);
-      return result;
-    }
+    app.use(function (req, res, next) {
+      let route = req.path.substring(1);
+      app.locals.activeRoute = "/" + (isNaN(route.split('/')[1]) ? route.replace(/\/(?!.*)/, "") : route.replace(/\/(.*)/, ""));
+      app.locals.viewingCategory = req.query.category;
+      next();
+    });
+    
 
     upload(req)
       .then((uploaded) => {
@@ -115,21 +147,21 @@ async function upload(req) {
       });
   } else {
     processItem('');
-}
+  }
 
-function processItem(imageUrl) {
+  function processItem(imageUrl) {
     req.body.featureImage = imageUrl;
     // TODO: Process the req.body and add it as a new Item before redirecting to /items
-    addItem(req.body)
-    .then((newItem) => {
-      console.log('New item added:', newItem);
-      res.redirect('/items');
-    })
-    .catch((error) => {
-      console.error('Error adding item:', error);
-      res.redirect('/items');
-    });  
-    res.redirect('/items');
+    storeService
+      .addItem(req.body)
+      .then((newItem) => {
+        console.log('New item added:', newItem);
+        res.redirect('/items');
+      })
+      .catch((error) => {
+        console.error('Error adding item:', error);
+        res.redirect('/items');
+      });
   }
 });
 
@@ -144,9 +176,8 @@ app.get('/item/:id', (req, res) => {
   }
 });
 
-
-
-storeService.initialize()
+storeService
+  .initialize()
   .then(() => {
     const port = process.env.PORT || 8080;
     app.listen(port, () => {
@@ -155,6 +186,5 @@ storeService.initialize()
   })
   .catch((error) => {
     console.error('Error initializing store service:', error);
-});
-
+  });
 
