@@ -50,7 +50,7 @@ app.use(express.static("public"));
 const Sequelize = require('sequelize');
 
 // set up sequelize to point to our postgres database
-var sequelize = new Sequelize('gpsyrubv', 'gpsyrubv', 'CYQ36MtuufaxABZt_5RTEt7dyNqsHw64', {
+var sequelize = new Sequelize('stcvyyaq', 'stcvyyaq', 'ao_RzL-gWikwz4qmDY_VeUaFGS5l_Z6Q', {
     host: 'stampy.db.elephantsql.com',
     dialect: 'postgres',
     port: 5432,
