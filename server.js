@@ -9,7 +9,7 @@ to any degree results in a ZERO for this assignment and possible failure of
 the course. 
 
 Name:   Yusuff Oyediran
-Student ID:   
+Student ID:   142813203
 Date:  7/19/2023
 Cyclic Web App URL:  
 GitHub Repository URL:  https://github.com/hack1011/web322-app
@@ -40,17 +40,15 @@ cloudinary.config({
 
 //  "upload" variable without any disk storage
 const upload = multer(); // no { storage: storage }
-
 const app = express();
 
-const HTTP_PORT = process.env.PORT || 8080;
-
+const HTTP_PORT = process.env.PORT || 8000;
 app.use(express.static("public"));
 
 const Sequelize = require('sequelize');
 
 // set up sequelize to point to our postgres database
-var sequelize = new Sequelize('stcvyyaq', 'stcvyyaq', 'ao_RzL-gWikwz4qmDY_VeUaFGS5l_Z6Q', {
+var sequelize = new Sequelize('qbihgsyc', 'qbihgsyc', '7J3jNb2vhZfChOfh4iZcM0J9SudaDlhm', {
     host: 'stampy.db.elephantsql.com',
     dialect: 'postgres',
     port: 5432,
@@ -67,7 +65,49 @@ sequelize
     })
     .catch(function(err) {
         console.log('Unable to connect to the database:', err);
-    });
+});
+
+// Set up Handlebars
+const hbs = exphbs.create({
+  // Handlebars configurations
+  extname: ".handlebars",
+  helpers: {
+      navLink: function (url, options) {
+          return (
+              '<li class="nav-item"><a' +
+              (url == app.locals.activeRoute
+                  ? ' class="nav-link active"'
+                  : ' class="nav-link"') +
+              ' href="' +
+              url +
+              '">' +
+              options.fn(this) +
+              "</a></li>"
+          );
+      },
+      equal: function (lvalue, rvalue, options) {
+          if (arguments.length < 3)
+              throw new Error("Handlebars Helper equal needs 2 parameters");
+          if (lvalue != rvalue) {
+              return options.inverse(this);
+          } else {
+              return options.fn(this);
+          }
+      },
+      formatDate: function (dateObj) {
+          let year = dateObj.getFullYear();
+          let month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+          let day = dateObj.getDate().toString().padStart(2, '0');
+          return `${year}-${month}-${day}`;
+      }
+  }
+});
+
+app.engine('handlebars', hbs.engine);
+app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'views'));
+
+
 
 //This will add the property "activeRoute" to "app.locals" whenever the route changes, i.e. if our route is "/store/5", the app.locals.activeRoute value will be "/store".  Also, if the shop is currently viewing a category, that category will be set in "app.locals".
 app.use(function (req, res, next) {
@@ -83,40 +123,6 @@ app.use(function (req, res, next) {
 
   next();
 });
-
-// Handlebars Setup
-app.engine(
-  ".hbs",
-  exphbs.engine({
-    extname: ".hbs",
-    helpers: {
-      navLink: function (url, options) {
-        return (
-          '<li class="nav-item"><a ' +
-          (url == app.locals.activeRoute
-            ? ' class="nav-link active" '
-            : ' class="nav-link" ') +
-          ' href="' +
-          url +
-          '">' +
-          options.fn(this) +
-          "</a></li>"
-        );
-      },
-      equal: function (lvalue, rvalue, options) {
-        if (arguments.length < 3)
-          throw new Error("Handlebars Helper equal needs 2 parameters");
-        if (lvalue != rvalue) {
-          return options.inverse(this);
-        } else {
-          return options.fn(this);
-        }
-      }
-    },
-  })
-);
-
-app.set("view engine", ".hbs");
 
 app.get("/", (req, res) => {
   res.redirect("/about");
@@ -276,19 +282,6 @@ app.post('/items/delete/:id', (req, res) => {
     });
 });
 
-
-// Get an individual item
-app.get("/item/:id", (req, res) => {
-  itemData
-    .getItemById(req.params.id)
-    .then((data) => {
-      res.json(data);
-    })
-    .catch((err) => {
-      res.json({ message: err });
-    });
-});
-
 app.get("/categories", (req, res) => {
   storeService.getCategories()
     .then((categories) => {
@@ -383,17 +376,17 @@ app.get('/categories/delete/:id', (req, res) => {
 });
 
 
-const hbs = exphbs.create({
-  // Handlebars configurations
-  helpers: {
-    formatDate: function(dateObj) {
-      let year = dateObj.getFullYear();
-      let month = (dateObj.getMonth() + 1).toString();
-      let day = dateObj.getDate().toString();
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    }
-  }
-});
+// const hbs = exphbs.create({
+//   // Handlebars configurations
+//   helpers: {
+//     formatDate: function(dateObj) {
+//       let year = dateObj.getFullYear();
+//       let month = (dateObj.getMonth() + 1).toString();
+//       let day = dateObj.getDate().toString();
+//       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+//     }
+//   }
+// });
 
 app.get('/items/delete/:id', (req, res) => {
   const itemId = req.params.id;
@@ -420,15 +413,11 @@ app.get('/items/delete/:id', (req, res) => {
 
 
 
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
-
 app.use((req, res) => {
   res.status(404).render("404");
 })
 
-itemData
-  .initialize()
+itemData.initialize()
   .then(() => {
     app.listen(HTTP_PORT, () => {
       console.log("server listening on: " + HTTP_PORT);
@@ -436,4 +425,4 @@ itemData
   })
   .catch((err) => {
     console.log(err);
-  });
+});

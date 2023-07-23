@@ -57,30 +57,30 @@ const sequelize = new Sequelize({
     price: {
       type: DataTypes.DOUBLE
     }
-  });
+});
   
   // Define the Category model
-  const Category = sequelize.define('Category', {
+const Category = sequelize.define('Category', {
     category: {
       type: DataTypes.STRING
     }
-  });
+});
   
   // Define the relationship between Item and Category
-  Item.belongsTo(Category, { foreignKey: 'categoryId' });
+Item.belongsTo(Category, { foreignKey: 'categoryId' });
   
   // Sync the models with the database
-  sequelize.sync()
+sequelize.sync()
     .then(() => {
       console.log('Models synced successfully.');
     })
     .catch((error) => {
       console.error('Error syncing models:', error);
-    });
+});
   
   // Export the models
-  module.exports.Item = Item;
-  module.exports.Category = Category;
+module.exports.Item = Item;
+module.exports.Category = Category;
 
 // getItemById function
 module.exports.getItemById = function (id) {
@@ -92,7 +92,7 @@ module.exports.getItemById = function (id) {
           throw new Error('No results returned');
         }
       });
-  };
+};
 
 // getAllItems function
 module.exports.getAllItems = function () {
@@ -104,7 +104,7 @@ module.exports.getAllItems = function () {
           throw new Error('No results returned');
         }
       });
-  };
+};
 
 // getPublishedItems function
 module.exports.getPublishedItems = function () {
@@ -120,7 +120,7 @@ module.exports.getPublishedItems = function () {
           throw new Error('No results returned');
         }
       });
-  };
+};
 
 // getCategories function
 module.exports.getCategories = function () {
@@ -132,7 +132,7 @@ module.exports.getCategories = function () {
           throw new Error('No results returned');
         }
       });
-  };
+};
 
 // addItem function
 module.exports.addItem = function (itemData) {
@@ -168,7 +168,7 @@ module.exports.getItemsByCategory = function (category) {
           throw new Error('No results returned');
         }
       });
-  };
+};
 
 // getItemsByMinDate function
 module.exports.getItemsByMinDate = function (minDateStr) {
@@ -187,7 +187,7 @@ module.exports.getItemsByMinDate = function (minDateStr) {
           throw new Error('No results returned');
         }
       });
-  }
+};
 
 // getPublishedItemsByCategory function
 module.exports.getPublishedItemsByCategory = function (category) {
