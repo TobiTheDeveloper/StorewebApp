@@ -40,10 +40,27 @@ cloudinary.config({
 
 //  "upload" variable without any disk storage
 const upload = multer(); // no { storage: storage }
+
 const app = express();
 
 const HTTP_PORT = process.env.PORT || 8000;
+
 app.use(express.static("public"));
+
+//This will add the property "activeRoute" to "app.locals" whenever the route changes, i.e. if our route is "/store/5", the app.locals.activeRoute value will be "/store".  Also, if the shop is currently viewing a category, that category will be set in "app.locals".
+app.use(function (req, res, next) {
+  let route = req.path.substring(1);
+
+  app.locals.activeRoute =
+    "/" +
+    (isNaN(route.split("/")[1])
+      ? route.replace(/\/(?!.*)/, "")
+      : route.replace(/\/(.*)/, ""));
+
+  app.locals.viewingCategory = req.query.category;
+
+  next();
+});
 
 const Sequelize = require('sequelize');
 
@@ -67,62 +84,44 @@ sequelize
         console.log('Unable to connect to the database:', err);
 });
 
-// Set up Handlebars
-const hbs = exphbs.create({
-  // Handlebars configurations
-  extname: ".handlebars",
-  helpers: {
-      navLink: function (url, options) {
-          return (
-              '<li class="nav-item"><a' +
-              (url == app.locals.activeRoute
-                  ? ' class="nav-link active"'
-                  : ' class="nav-link"') +
-              ' href="' +
-              url +
-              '">' +
-              options.fn(this) +
-              "</a></li>"
-          );
+app.engine(
+  ".hbs",
+  exphbs.engine({
+    extname: ".hbs",
+    helpers: {
+      navLink: function(url, options){
+        return (
+          '<li class="nav-item"><a ' +
+          (url == app.locals.activeRoute
+            ? ' class="nav-link active" '
+            : ' class="nav-link" ') +
+          ' herf="' +
+          url +
+          '">' +
+          options.fn(this) +
+          "</a></li>"
+        );
       },
       equal: function (lvalue, rvalue, options) {
-          if (arguments.length < 3)
-              throw new Error("Handlebars Helper equal needs 2 parameters");
-          if (lvalue != rvalue) {
-              return options.inverse(this);
-          } else {
-              return options.fn(this);
-          }
+        if (arguments.length < 3)
+          throw new Error("Handlebars Helper equal needs 2 parameters");
+        if (lvalue != rvalue) {
+          return options.inverse(this);
+        } else {
+          return options.fn(this);
+        }
+        }
       },
       formatDate: function (dateObj) {
-          let year = dateObj.getFullYear();
-          let month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-          let day = dateObj.getDate().toString().padStart(2, '0');
-          return `${year}-${month}-${day}`;
+        let year = dateObj.getFullYear();
+        let month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        let day = dateObj.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
       }
-  }
-});
+  })
+);
 
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
-app.set('views', path.join(__dirname, 'views'));
-
-
-
-//This will add the property "activeRoute" to "app.locals" whenever the route changes, i.e. if our route is "/store/5", the app.locals.activeRoute value will be "/store".  Also, if the shop is currently viewing a category, that category will be set in "app.locals".
-app.use(function (req, res, next) {
-  let route = req.path.substring(1);
-
-  app.locals.activeRoute =
-    "/" +
-    (isNaN(route.split("/")[1])
-      ? route.replace(/\/(?!.*)/, "")
-      : route.replace(/\/(.*)/, ""));
-
-  app.locals.viewingCategory = req.query.category;
-
-  next();
-});
+app.set('view engine', '.hbs');
 
 app.get("/", (req, res) => {
   res.redirect("/about");
@@ -176,10 +175,10 @@ app.get("/shop", async (req, res) => {
   }
 
   // render the "shop" view with all of the data (viewData)
-  res.render("shop", { data: viewData });
+  res.render("./shop.hbs", { data: viewData });
 });
 
-app.get('/items', (req, res) => {
+app.get('./items', (req, res) => {
   storeService.getAllItems()
     .then((items) => {
       if (items.length > 0) {
@@ -373,20 +372,7 @@ app.get('/categories/delete/:id', (req, res) => {
     .catch((error) => {
       res.status(500).send('Unable to Remove Category / Category not found');
     });
-});
-
-
-// const hbs = exphbs.create({
-//   // Handlebars configurations
-//   helpers: {
-//     formatDate: function(dateObj) {
-//       let year = dateObj.getFullYear();
-//       let month = (dateObj.getMonth() + 1).toString();
-//       let day = dateObj.getDate().toString();
-//       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-//     }
-//   }
-// });
+}); 
 
 app.get('/items/delete/:id', (req, res) => {
   const itemId = req.params.id;

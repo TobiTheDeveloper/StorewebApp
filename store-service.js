@@ -9,16 +9,18 @@ to any degree results in a ZERO for this assignment and possible failure of
 the course. 
 
 Name:   Yusuff Oyediran
-Student ID:   
+Student ID:   142813203
 Date:  7/19/2023
 Cyclic Web App URL:  
 GitHub Repository URL:  https://github.com/hack1011/web322-app
 
-********************************************************************************/  
+********************************************************************************/
 
 const fs = require("fs");
 const { Sequelize, DataTypes } = require('sequelize');
 
+let items = [];
+let categories = [];
 
 module.exports.initialize = function () {
     return new Promise((resolve, reject) => {
@@ -26,7 +28,16 @@ module.exports.initialize = function () {
             if (err) {
                 reject(err);
             } else {
-                resolve();
+                items = JSON.parse(data);
+
+                fs.readFile('./data/categories.json', 'utf8', (err, data) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        categories = JSON.parse(data);
+                        resolve();
+                    }
+                });
             }
         });
     });
