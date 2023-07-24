@@ -19,8 +19,247 @@ GitHub Repository URL:  https://github.com/hack1011/web322-app
 const fs = require("fs");
 const { Sequelize, DataTypes } = require('sequelize');
 
-let items = [];
-let categories = [];
+const sequelize = new Sequelize('qbihgsyc', 'qbihgsyc', '7J3jNb2vhZfChOfh4iZcM0J9SudaDlhm', {
+  host: 'stampy.db.elephantsql.com',
+  dialect: 'postgres',
+  port: 5432,
+  dialectOptions: {
+      ssl: { rejectUnauthorized: false }
+  },
+  query: { raw: true }
+});
+
+// Define the Item model
+const Item = sequelize.define('Item', {
+  body: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  postDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  featureImage: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  published: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  price: {
+    type: DataTypes.DOUBLE,
+    allowNull: false,
+  },
+});
+
+// Define the Category model
+const Category = sequelize.define('Category', {
+  category: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+});
+
+
+// Define the relationship between Item and Category
+Item.belongsTo(Category, { foreignKey: 'category' });
+
+// Sync the models with the database
+let initialize = async () => {
+  try {
+      await sequelize.sync({ force: true });
+      console.log('Database and tables synced!');
+  } catch (error) {
+      console.error('Error syncing the database:', error);
+  }
+};
+
+
+// Add a new category
+async function addCategory(categoryData) {
+  try {
+    for (const key in categoryData) {
+      if (categoryData.hasOwnProperty(key) && categoryData[key] === "") {
+        categoryData[key] = null;
+      }
+    }
+
+    await Category.create(categoryData);
+  } catch (error) {
+    throw new Error('Unable to create category');
+  }
+}
+
+
+// Delete a category by id
+async function deleteCategoryById(id) {
+  try {
+    const numDeleted = await Category.destroy({
+      where: {
+        id: id
+      }
+    });
+
+    if (numDeleted === 0) {
+      throw new Error('Category not found');
+    }
+  } catch (error) {
+    throw new Error('Error deleting category');
+  }
+}
+
+// Delete a post by id
+async function deletePostById(id) {
+  try {
+    const numDeleted = await Item.destroy({
+      where: {
+        id: id
+      }
+    });
+
+    if (numDeleted === 0) {
+      throw new Error('Post not found');
+    }
+  } catch (error) {
+    throw new Error('Error deleting post');
+  }
+}
+
+// Get all items
+async function getAllItems() {
+  try {
+    const items = await Item.findAll();
+    if (items.length === 0) {
+      throw new Error('No results returned');
+    }
+    return items;
+  } catch (error) {
+    throw new Error('No results returned');
+  }
+}
+
+// Get items by category
+async function getItemsByCategory(categoryId) {
+  try {
+    const items = await Item.findAll({ where: { category: categoryId } });
+    if (items.length === 0) {
+      throw new Error('No results returned');
+    }
+    return items;
+  } catch (error) {
+    throw new Error('No results returned');
+  }
+}
+
+// Get items by minimum date
+async function getItemsByMinDate(minDateStr) {
+  try {
+    const { Op } = Sequelize;
+    const items = await Item.findAll({
+      where: {
+        postDate: { [Op.gte]: new Date(minDateStr) }
+      }
+    });
+    if (items.length === 0) {
+      throw new Error('No results returned');
+    }
+    return items;
+  } catch (error) {
+    throw new Error('No results returned');
+  }
+}
+
+// Get item by ID
+async function getItemById(itemId) {
+  try {
+    const item = await Item.findAll({ where: { id: itemId } });
+    if (item.length === 0) {
+      throw new Error('No results returned');
+    }
+    return item[0];
+  } catch (error) {
+    throw new Error('No results returned');
+  }
+}
+
+// Add an item
+async function addItem(itemData) {
+  try {
+    itemData.published = !!itemData.published;
+    for (const key in itemData) {
+      if (itemData.hasOwnProperty(key) && itemData[key] === "") {
+        itemData[key] = null;
+      }
+    }
+    itemData.postDate = new Date();
+
+    await Item.create(itemData);
+  } catch (error) {
+    throw new Error('Unable to create post');
+  }
+}
+
+// Get all published items
+async function getPublishedItems() {
+  try {
+    const items = await Item.findAll({ where: { published: true } });
+    if (items.length === 0) {
+      throw new Error('No results returned');
+    }
+    return items;
+  } catch (error) {
+    throw new Error('No results returned');
+  }
+}
+
+// Get published items by category
+async function getPublishedItemsByCategory(categoryId) {
+  try {
+    const items = await Item.findAll({ where: { published: true, category: categoryId } });
+    if (items.length === 0) {
+      throw new Error('No results returned');
+    }
+    return items;
+  } catch (error) {
+    throw new Error('No results returned');
+  }
+}
+
+// Get all categories
+async function getCategories() {
+  try {
+    const categories = await Category.findAll();
+    if (categories.length === 0) {
+      throw new Error('No results returned');
+    }
+    return categories;
+  } catch (error) {
+    throw new Error('No results returned');
+  }
+}
+
+// Export the functions
+module.exports = {
+  initialize,
+  getAllItems,
+  getItemsByCategory,
+  getItemsByMinDate,
+  getItemById,
+  addItem,
+  getPublishedItems,
+  getPublishedItemsByCategory,
+  getCategories,
+};
+
+// let items = [];
+// let categories = [];
 
 module.exports.initialize = function () {
     return new Promise((resolve, reject) => {
@@ -42,56 +281,6 @@ module.exports.initialize = function () {
         });
     });
 }
-
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './data/database.db'
-  });
-  
-  // Define the Item model
-  const Item = sequelize.define('Item', {
-    body: {
-      type: DataTypes.TEXT
-    },
-    title: {
-      type: DataTypes.STRING
-    },
-    postDate: {
-      type: DataTypes.DATE
-    },
-    featureImage: {
-      type: DataTypes.STRING
-    },
-    published: {
-      type: DataTypes.BOOLEAN
-    },
-    price: {
-      type: DataTypes.DOUBLE
-    }
-});
-  
-  // Define the Category model
-const Category = sequelize.define('Category', {
-    category: {
-      type: DataTypes.STRING
-    }
-});
-  
-  // Define the relationship between Item and Category
-Item.belongsTo(Category, { foreignKey: 'categoryId' });
-  
-  // Sync the models with the database
-sequelize.sync()
-    .then(() => {
-      console.log('Models synced successfully.');
-    })
-    .catch((error) => {
-      console.error('Error syncing models:', error);
-});
-  
-  // Export the models
-module.exports.Item = Item;
-module.exports.Category = Category;
 
 // getItemById function
 module.exports.getItemById = function (id) {
@@ -270,6 +459,8 @@ module.exports.deletePostById = function (id) {
         throw new Error('Error deleting post');
       });
 };
+
+
   
 
 

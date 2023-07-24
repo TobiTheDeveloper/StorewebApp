@@ -24,8 +24,6 @@ const path = require("path");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
-
-// AS4, Setup handlebars
 const exphbs = require("express-handlebars");
 const { Console } = require("console");
 
@@ -65,7 +63,7 @@ app.use(function (req, res, next) {
 const Sequelize = require('sequelize');
 
 // set up sequelize to point to our postgres database
-var sequelize = new Sequelize('qbihgsyc', 'qbihgsyc', '7J3jNb2vhZfChOfh4iZcM0J9SudaDlhm', {
+const sequelize = new Sequelize('qbihgsyc', 'qbihgsyc', '7J3jNb2vhZfChOfh4iZcM0J9SudaDlhm', {
     host: 'stampy.db.elephantsql.com',
     dialect: 'postgres',
     port: 5432,
@@ -95,7 +93,7 @@ app.engine(
           (url == app.locals.activeRoute
             ? ' class="nav-link active" '
             : ' class="nav-link" ') +
-          ' herf="' +
+          ' href="' + 
           url +
           '">' +
           options.fn(this) +
@@ -175,21 +173,21 @@ app.get("/shop", async (req, res) => {
   }
 
   // render the "shop" view with all of the data (viewData)
-  res.render("./shop.hbs", { data: viewData });
+  res.render("shop", { data: viewData });
 });
 
-app.get('./items', (req, res) => {
-  storeService.getAllItems()
-    .then((items) => {
-      if (items.length > 0) {
-        res.render('items', { Items: items });
-      } else {
-        res.render('items', { message: 'No results' });
-      }
-    })
-    .catch((error) => {
-      res.render('items', { message: 'Error fetching data' });
-    });
+// Update the '/Items' route to handle empty data
+app.get('/Items', async (req, res) => {
+  try {
+    const items = await storeService.getAllItems();
+    if (items.length > 0) {
+      res.render('Items', { Items: items });
+    } else {
+      res.render('Items', { message: 'No results' });
+    }
+  } catch (error) {
+    res.render('Items', { error: 'Error fetching data' });
+  }
 });
 
 // A route for items/add
@@ -281,20 +279,19 @@ app.post('/items/delete/:id', (req, res) => {
     });
 });
 
-app.get("/categories", (req, res) => {
-  storeService.getCategories()
-    .then((categories) => {
-      if (categories.length > 0) {
-        res.render('categories', { Categories: categories });
-      } else {
-        res.render('categories', { message: 'No results' });
-      }
-    })
-    .catch((error) => {
-      res.render('categories', { message: 'Error fetching data' });
-    });
+// Update the '/categories' route to handle empty data
+app.get('/categories', async (req, res) => {
+  try {
+    const categories = await storeService.getCategories();
+    if (categories.length > 0) {
+      res.render('categories', { Categories: categories });
+    } else {
+      res.render('categories', { message: 'No results' });
+    }
+  } catch (error) {
+    res.render('categories', { error: 'Error fetching data' });
+  }
 });
-
 
 app.get('/shop/:id', async (req, res) => {
 
@@ -374,17 +371,6 @@ app.get('/categories/delete/:id', (req, res) => {
     });
 }); 
 
-app.get('/items/delete/:id', (req, res) => {
-  const itemId = req.params.id;
-  storeService
-    .deletePostById(itemId)
-    .then(() => {
-      res.redirect('/items');
-    })
-    .catch((error) => {
-      res.status(500).send('Unable to Remove Item / Item not found');
-    });
-});
 
 app.get('/items/delete/:id', (req, res) => {
   const postId = req.params.id;
@@ -396,8 +382,6 @@ app.get('/items/delete/:id', (req, res) => {
       res.status(500).send('Unable to Remove Post / Post not found');
     });
 });
-
-
 
 app.use((req, res) => {
   res.status(404).render("404");
