@@ -3,6 +3,7 @@
         <h2>Items</h2>
         <a href="/items/add" class="btn btn-success pull-right">Add Post</a>
 
+        {{#if items.length}}
         <div class="table-responsive">
             <table class="table ">
                 <thead>
@@ -35,10 +36,10 @@
                 </tbody>
             </table>
         </div>
+        {{else}}
+        <div class="col-md-12 text-center">
+            <strong>{{message}}</strong>
+        </div>
+        {{/if}}
     </div>
-    {{#unless items}}
-    <div class="col-md-12 text-center">
-        <strong>{{message}}</strong>
-    </div>
-    {{/unless}}
 </div>

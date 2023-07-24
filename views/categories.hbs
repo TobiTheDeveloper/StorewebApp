@@ -1,3 +1,5 @@
+<!-- categories.hbs -->
+
 <div class="row">
   <div class="col-md-12">
     <h2>Categories</h2>
@@ -15,8 +17,8 @@
         <tbody>
           {{#each categories}}
           <tr>
-            <td><a href="/Items?category={{id}}">{{id}}</a></td>
-            <td><a href="/Items?category={{id}}">{{category}}</a></td>
+            <td>{{id}}</td>
+            <td>{{category}}</td>
             <td>
               <a href="/categories/delete/{{id}}" class="btn btn-danger">Remove</a>
             </td>
