@@ -488,12 +488,12 @@ app.use((req, res) => {
   res.status(404).render("404");
 })
 
-// itemData.initialize()
-//   .then(() => {
-//     app.listen(HTTP_PORT, () => {
-//       console.log("server listening on: " + HTTP_PORT);
-//     });
-//   })
-//   .catch((err) => {
-//     console.log(err);
-// });
+itemData.initialize()
+  .then(() => {
+    app.listen(HTTP_PORT, () => {
+      console.log("server listening on: " + HTTP_PORT);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+});
