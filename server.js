@@ -43,7 +43,7 @@ const upload = multer(); // no { storage: storage }
 
 const app = express();
 
-const HTTP_PORT = process.env.PORT || 8080;
+const HTTP_PORT = process.env.PORT || 3000;
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
