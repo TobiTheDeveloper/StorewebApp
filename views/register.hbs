@@ -1,0 +1,46 @@
+<style>
+  {{!-- body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4f4f4; /* Optional: background color */
+} --}}
+
+form,
+.alert {
+  width: 80%;
+  max-width: 400px; /* You can adjust this as needed */
+  margin: 10px 0; /* Spacing between elements */
+}
+
+input,
+button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  box-sizing: border-box; /* Makes padding and border part of the width */
+}
+
+.btn {
+  text-align: center; /* Center align text in the button */
+}
+
+</style>
+{{#if successMessage}}
+<div class="alert alert-success"> <strong>Success:</strong> {{successMessage}}</div>
+<a class="btn btn-success pull-right" href="/login">&nbsp;&nbsp;&nbsp;Proceed to Log in&nbsp;&nbsp;&nbsp;</a>
+{{else}}
+<form action="/register" method="post">
+  <input type="text" name="userName" placeholder="User Name" required value="{{userName}}">
+  <input type="password" name="password" placeholder="Password" required>
+  <input type="password" name="password2" placeholder="Confirm Password" required>
+  <input type="email" name="email" placeholder="Email Address" required>
+  <button type="submit" value="Register">Register</button>
+</form>
+{{#if errorMessage}}
+<div class="alert alert-danger"> <strong>Error:</strong> {{errorMessage}}</div>
+{{/if}}
+{{/if}}
