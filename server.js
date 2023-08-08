@@ -136,8 +136,7 @@ client.connect(err => {
     return;
   }
   console.log('Connected successfully to MongoDB');
-  // Your code to interact with the database goes here
-  client.close(); // Remember to close the connection when done
+  client.close(); 
 });
 
 
