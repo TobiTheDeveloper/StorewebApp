@@ -1,6 +1,6 @@
 /********************************************************************************* 
 
-WEB322 – Assignment 05
+WEB322 – Assignment 06
 I declare that this assignment is my own work in accordance with Seneca
 Academic Policy.  No part of this assignment has been copied manually or 
 electronically from any other source (including 3rd party web sites) or 
@@ -15,9 +15,11 @@ Cyclic Web App URL:  https://real-jade-kitten-shoe.cyclic.app/
 GitHub Repository URL:  https://github.com/hack1011/web322-app
 
 ********************************************************************************/
-
 const express = require("express");
 const itemData = require("./store-service");
+const authData = require("./auth-service");
+const storeData = require('./store-service');
+const clientSessions = require('client-sessions');
 const path = require("path");
 
 // 3 new modules, multer, cloudinary, streamifier
@@ -41,7 +43,10 @@ const upload = multer(); // no { storage: storage }
 
 const app = express();
 
-const HTTP_PORT = process.env.PORT || 8000;
+const HTTP_PORT = process.env.PORT || 8080;
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static("public"));
 
@@ -63,8 +68,8 @@ app.use(function (req, res, next) {
 const Sequelize = require('sequelize');
 
 // set up sequelize to point to our postgres database
-const sequelize = new Sequelize('qbihgsyc', 'qbihgsyc', '7J3jNb2vhZfChOfh4iZcM0J9SudaDlhm', {
-    host: 'stampy.db.elephantsql.com',
+const sequelize = new Sequelize('lpnuddxr', 'lpnuddxr', 'maVsIe5DntHEOhFRMR-qq8JIOsIE4abG', {
+    host: 'trumpet.db.elephantsql.com',
     dialect: 'postgres',
     port: 5432,
     dialectOptions: {
@@ -120,6 +125,90 @@ app.engine(
 );
 
 app.set('view engine', '.hbs');
+
+const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://yusuffoyediranyo:qfL3mWnzOAF3IL9j@senecaweb-app.khhteiw.mongodb.net/?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+storeData.initialize()
+  .then(() => authData.initialize(uri))
+  .then(function(){
+    app.listen(HTTP_PORT, function(){
+      console.log("app listening on: " + HTTP_PORT);
+    });
+  })
+  .catch(function(err){
+    console.log("unable to start server: " + err);
+});
+
+
+app.use(clientSessions({
+  cookieName: 'session',
+  secret: 'web222_assign06', 
+  duration: 2 * 60 * 1000,
+  activeDuration: 1000 * 60 
+}));
+
+app.use(function(req, res, next) {
+  res.locals.session = req.session;
+  next();
+});
+
+function ensureLogin(req, res, next) {
+  if (!req.session.user) {
+    res.redirect('/login');
+  } else {
+    next();
+  }
+}
+
+app.use('/items', ensureLogin);
+app.use('/categories', ensureLogin);
+app.use('/post', ensureLogin);
+app.use('/category', ensureLogin);
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+app.post('/register', (req, res) => {
+  console.log("Request body:", req.body); // Log the request body
+
+  authData.registerUser(req.body)
+    .then(() => res.render('register', { successMessage: "User created" }))
+    .catch(err => {
+      console.log("Error:", err); // Log the error
+      res.render('register', { errorMessage: err, userName: req.body ? req.body.userName : '' });
+    });
+});
+
+
+app.post('/login', (req, res) => {
+  req.body.userAgent = req.get('User-Agent');
+  authData.checkUser(req.body)
+    .then((user) => {
+      req.session.user = {
+        userName: user.userName,
+        email: user.email,
+        loginHistory: user.loginHistory
+      };
+      res.redirect('/items');
+    })
+    .catch(err => res.render('login', { errorMessage: err, userName: req.body.userName }));
+});
+
+app.get('/logout', (req, res) => {
+  req.session.reset(); 
+  res.redirect('/');
+});
+
+app.get('/userHistory', ensureLogin, (req, res) => {
+  res.render('userHistory');
+});
 
 app.get("/", (req, res) => {
   res.redirect("/about");
@@ -387,12 +476,12 @@ app.use((req, res) => {
   res.status(404).render("404");
 })
 
-itemData.initialize()
-  .then(() => {
-    app.listen(HTTP_PORT, () => {
-      console.log("server listening on: " + HTTP_PORT);
-    });
-  })
-  .catch((err) => {
-    console.log(err);
-});
+// itemData.initialize()
+//   .then(() => {
+//     app.listen(HTTP_PORT, () => {
+//       console.log("server listening on: " + HTTP_PORT);
+//     });
+//   })
+//   .catch((err) => {
+//     console.log(err);
+// });
