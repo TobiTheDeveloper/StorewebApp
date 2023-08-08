@@ -130,6 +130,18 @@ const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://yusuffoyediranyo:qfL3mWnzOAF3IL9j@senecaweb-app.khhteiw.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
+client.connect(err => {
+  if (err) {
+    console.error('Failed to connect to MongoDB:', err);
+    return;
+  }
+  console.log('Connected successfully to MongoDB');
+  // Your code to interact with the database goes here
+  client.close(); // Remember to close the connection when done
+});
+
+
+
 storeData.initialize()
   .then(() => authData.initialize(uri))
   .then(function(){
